@@ -1,0 +1,41 @@
+import os,sys
+import _init_paths
+from test_stream_lib import test_net_stream
+from fast_rcnn.config import cfg, cfg_from_file, cfg_from_list
+from datasets.factory import get_imdb
+from send_dets import send_dets
+from signal import SIGTERM as sig_sgtm
+
+def detect_images(net,time_to_live,post_data):
+    ## post_data = [token,host_data]
+    img_dir = "./images/"
+    mlist = os.listdir(img_dir)
+    pr_list = []
+    print("IN DET")
+    while(time_to_live > 0):
+        if len(mlist) > 0:
+            nm = mlist[0]
+            dets = test_net_stream(net,img_dir + nm,thresh=0.05)
+            if(len(pr_list) > 10):
+                for i in pr_list[0:5]:
+                    os.waitpid(i,0)
+                    pr_list.remove(i)
+            newpid = os.fork()
+            if newpid == 0:
+                #CHILD PROCESS
+                if send_dets(dets, nm,post_data) == 0:
+                    print("ERR")
+                else:
+                    print("SENT img: ",nm)
+                os._exit(0)
+            else:
+                #PARENT PROCESS
+                pr_list += [newpid]
+            os.remove(img_dir + nm)
+            #time_to_live -= 1
+        mlist = os.listdir(img_dir)
+
+
+
+
+

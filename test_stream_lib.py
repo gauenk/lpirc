@@ -56,7 +56,7 @@ def _get_image_blob(im):
         #im_scale = float(0.1)  kent added
         if np.round(im_scale * im_size_max) > cfg.TEST.MAX_SIZE:
             im_scale = float(cfg.TEST.MAX_SIZE) / float(im_size_max) #kent comment
-        #im_scale = float(0.5)
+        #im_scale = im_scale * float(1.0)
         #import matplotlib.pyplot as plt
         im = cv2.resize(im_orig, None, None, fx=im_scale, fy=im_scale,
                         interpolation=cv2.INTER_LINEAR)
@@ -203,10 +203,10 @@ def apply_nms(all_boxes, thresh):
     return nms_boxes
 
 def send_out_dets(dets,out_dir):
-    cPickle
+    pass
 
 
-def test_net_stream(net, _img, max_per_image=100, thresh=0.005, vis=False):
+def test_net_stream(net, _img, max_per_image=100, thresh=0.05, vis=False):
     cfg.TEST.HAS_RPN = True
     """Test a Fast R-CNN network on an image database."""
     num_images = 1
@@ -239,6 +239,9 @@ def test_net_stream(net, _img, max_per_image=100, thresh=0.005, vis=False):
     im = cv2.imread(_img)
     _t['im_detect'].tic()
     scores, boxes = im_detect(net, im, box_proposals)
+    # for i in scores:
+    #     print(len(i)) 
+    #     print(i)
     _t['im_detect'].toc()
     _t['misc'].tic()
     # skip j = 0, because it's the background class
@@ -275,7 +278,7 @@ def test_net_stream(net, _img, max_per_image=100, thresh=0.005, vis=False):
 
     for j in xrange(1, n_classes):
         for i in xrange(num_images):
-            inds = np.where(all_boxes[j][i][:, -1] > thresh[j])[0]
+            inds = np.where(all_boxes[j][i][2, -1] > thresh[j])[0]
             all_boxes[j][i] = all_boxes[j][i][inds, :]
 
     #det_file = os.path.join(output_dir, 'detections.pkl')

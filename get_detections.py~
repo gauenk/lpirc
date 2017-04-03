@@ -1,0 +1,45 @@
+import os,sys,time
+import _init_paths
+import caffe
+import subprocess
+import atexit
+
+caffe.set_mode_gpu()
+caffe.set_device(0)
+#img_dir = "./images/"
+#mlist = os.listdir(img_dir)
+n_classes= 21
+pr_list = []
+time_to_live = 1000
+n_time = time.time()
+post_data = None
+net = None
+ttl = None
+print("IN DET")
+
+while(time_to_live > 0):
+    try:
+        _img = raw_input()
+        if post_data is None:
+            data = eval(_img)
+            net = data[0]
+            post_data = data[1]
+            print(post_data)
+            p = subprocess.Popen(['python', 'test.py'], stdin = subprocess.PIPE)
+            p.stdin.write(repr(post_data)+"\n")
+            ttl = data[2]
+            print("SAFELY PARSED FROM PIPE\n\n\n")
+            continue
+        
+        print("GOT IMAGE\n\n")
+        print(_img)
+        print(eval(_img))
+        print("EVALED IMAGE\n\n\n")
+        #dets = test_net_stream(net,img_dir + nm,thresh=0.05)
+        dets = [[1,2,3,4,5,6,7] for i in range(21)]
+        x = repr(dets).replace("\n","").strip() ## parse detections for safe piping
+        print("DID THE PARSING")
+        #p.stdin.write(x+"\n")
+            
+    except:
+        print("EXCEPTION\n\n\n")

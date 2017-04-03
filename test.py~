@@ -1,0 +1,15 @@
+import ast
+import time,re
+
+while(True):
+    try:
+        line = raw_input() 
+        print(line)
+        print("\n\nMADE IT")
+        l = ast.literal_eval(line)
+        print(l[10][0])
+        time.sleep(5)
+    except EOFError:
+        time.sleep(0.1)
+    except:
+        raise
